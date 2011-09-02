@@ -4,6 +4,8 @@
 	authorizationを取り除いた
 	identifyをdelegate対応
 	自動的にcontroller->data[User][password]をハッシュ化しない（コンポーネント側はする）
+	userVariableName を追加。コントローラに自動的に設定される
+	password:row にハッシュ前のパスワードを渡すように修正
 */
 
 App::import('Core', array('Router', 'Security'), false);
@@ -182,6 +184,14 @@ class AuthenticationComponent extends Object {
 	public $params = array();
 
 /**
+ * Login user variable name to set in controller
+ *
+ * @var array
+ * @access public
+ */
+	public $userVariableName = 'login_user';
+	
+/**
  * Method list for bound controller
  *
  * @var array
@@ -217,6 +227,8 @@ class AuthenticationComponent extends Object {
  * @access public
  */
 	public function startup($controller) {
+		$controller->set($this->userVariableName, '');
+		
 		$isErrorOrTests = (
 			strtolower($controller->name) == 'cakeerror' or
 			(strtolower($controller->name) == 'tests' and Configure::read() > 0)
@@ -261,35 +273,36 @@ class AuthenticationComponent extends Object {
 
 		if ($loginAction == $url) {
 			$model = $this->getModel();
-			if (empty($controller->data) or !isset($controller->data[$model->alias])) {
+			$alias = $model->alias;
+			$username = $this->fields['username'];
+			$password = $this->fields['password'];
+			$data = $this->data;
+			
+			if (empty($data[$alias])) {
 				if (!$this->Session->check('Auth.redirect') and !$this->loginRedirect and env('HTTP_REFERER')) {
 					$this->Session->write('Auth.redirect', $controller->referer(null, true));
 				}
 				return false;
 			}
 
-			$isValid = !empty($controller->data[$model->alias][$this->fields['username']]) and
-				!empty($controller->data[$model->alias][$this->fields['password']]);
-
-			if ($isValid) {
-				$username = $controller->data[$model->alias][$this->fields['username']];
-				$password = $controller->data[$model->alias][$this->fields['password']];
-
+			if (!empty($data[$alias][$username]) and !empty($data[$alias][$password])) {
 				$data = array(
-					$model->alias . '.' . $this->fields['username'] => $username,
-					$model->alias . '.' . $this->fields['password'] => $password
+					$alias . '.' . $username => $data[$alias][$username],
+					$alias . '.' . $password => $data[$alias][$password]
 				);
-
+				
 				if ($this->login($data)) {
 					if ($this->autoRedirect) {
 						$controller->redirect($this->redirect(), null, true);
 					}
+					
+					$controller->set($this->userVariableName, $this->user());
 					return true;
 				}
 			}
 
 			$this->Session->setFlash($this->loginError, $this->flashElement, array(), 'auth');
-			$controller->data[$model->alias][$this->fields['password']] = null;
+			$controller->data[$alias][$password] = null;
 			return false;
 		} else {
 			$user = $this->user();
@@ -313,6 +326,8 @@ class AuthenticationComponent extends Object {
 					$controller->redirect(null, 403);
 				}
 			}
+			
+			$controller->set($this->userVariableName, $user);
 		}
 
 		return true;
@@ -637,6 +652,7 @@ class AuthenticationComponent extends Object {
 		$password = $this->fields['password'];
 		
 		if(!empty($data[$alias][$username]) and !empty($data[$alias][$password])) {
+			$data[$alias][$password. ':raw'] = $data[$alias][$password];
 			$data[$alias][$password] = $this->password($data[$alias][$password]);
 		}
 		

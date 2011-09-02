@@ -5,6 +5,9 @@ class AuthComponent extends Object {
 	
 	public $data;
 	
+	public $Authentication;
+	public $Authorization;
+	
 	public function initialize($controller, $settings = array()) {
 		$this->Authentication->initialize($controller, $settings);
 		$this->Authorization->initialize($controller, $settings);
@@ -34,6 +37,18 @@ class AuthComponent extends Object {
 	public function deny() {
 		$args = func_get_args();
 		call_user_func_array(array($this->Authentication, 'deny'), $args);
+	}
+	
+	public function __set($name, $val) {
+		$this->{$name} = $val;
+		
+		if (!empty($this->Authentication) and property_exists($this->Authentication, $name)) {
+			$this->Authentication->{$name} = $val;
+		}
+		
+		if (!empty($this->Authorization) and property_exists($this->Authorization, $name)) {
+			$this->Authorization->{$name} = $val;
+		}
 	}
 }
 
