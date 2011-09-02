@@ -6,11 +6,11 @@ class AuthorizationComponent extends Object {
 	protected $modelClass;
 	
 	public function initialize($controller, $settings = array()) {
+		$this->controller = $controller;
+		$this->modelClass = $controller->modelClass;
 	}
 	
 	public function startup($controller) {
-		$this->controller = $controller;
-		$this->modelClass = $controller->modelClass;
 	}
 	
 	public function shutdown($controller) {

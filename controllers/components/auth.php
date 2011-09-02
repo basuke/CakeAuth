@@ -3,6 +3,8 @@
 class AuthComponent extends Object {
 	public $components = array('Auth.Authentication', 'Auth.Authorization');
 	
+	public $data;
+	
 	public function initialize($controller, $settings = array()) {
 		$this->Authentication->initialize($controller, $settings);
 		$this->Authorization->initialize($controller, $settings);
@@ -10,6 +12,8 @@ class AuthComponent extends Object {
 	
 	public function startup($controller) {
 		$this->Authentication->startup($controller);
+		$this->data = $this->Authentication->data;
+		
 		$this->Authorization->startup($controller);
 	}
 	

@@ -3,6 +3,7 @@
 /*
 	authorizationを取り除いた
 	identifyをdelegate対応
+	自動的にcontroller->data[User][password]をハッシュ化しない（コンポーネント側はする）
 */
 
 App::import('Core', array('Router', 'Security'), false);
@@ -239,7 +240,7 @@ class AuthenticationComponent extends Object {
 			return false;
 		}
 
-		$this->data = $controller->data = $this->hashPasswords($controller->data);
+		$this->data = $this->hashPasswords($controller->data);
 		$url = '';
 
 		if (isset($controller->params['url']['url'])) {
