@@ -35,8 +35,20 @@ class AuthComponent extends Object {
 		call_user_func_array(array($this->Authentication, 'deny'), $args);
 	}
 	
+	public function login($data = null) {
+		return $this->Authentication->login($data);
+	}
+	
 	public function logout() {
 		return $this->Authentication->logout();
+	}
+	
+	public function user($key = null) {
+		return $this->Authentication->user($key);
+	}
+	
+	public function redirect($url = null) {
+		return $this->Authentication->redirect($url);
 	}
 	
 	public function __get($name) {
