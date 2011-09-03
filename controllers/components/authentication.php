@@ -352,7 +352,7 @@ class AuthenticationComponent extends Object {
  * @return boolean
  * @access private
  */
-	public function __setDefaults() {
+	private function __setDefaults() {
 		if (empty($this->userModel)) {
 			trigger_error(__("Could not find \$userModel. Please set AuthComponent::\$userModel in beforeFilter().", true), E_USER_WARNING);
 			return false;
@@ -524,23 +524,17 @@ class AuthenticationComponent extends Object {
  * Returns a reference to the model object specified, and attempts
  * to load it if it is not found.
  *
- * @param string $name Model name (defaults to AuthComponent::$userModel)
  * @return object A reference to a model object
- * @access public
+ * @access protected
  */
-	public function getModel($name = null) {
-		$model = null;
-		if (!$name) {
-			$name = $this->userModel;
-		}
-
-		$model = ClassRegistry::init($name);
-
+	protected function getModel() {
+		$model = ClassRegistry::init($this->userModel);
+		
 		if (empty($model)) {
 			trigger_error(__('Auth::getModel() - Model is not set or could not be found', true), E_USER_WARNING);
 			return null;
 		}
-
+		
 		return $model;
 	}
 
