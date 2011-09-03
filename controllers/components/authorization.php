@@ -38,29 +38,29 @@ class AuthorizationComponent extends Object {
 		$action = $controller->action;
 		
 		if (is_object($target) and method_exists($target, 'isAuthorized')) {
-			$result = $target->isAuthorized($requester, $controller, $action);
+			$result = $target->isAuthorized($requester, $action);
 			if ($result !== null) return $result;
 		}
 		
 		$Model = $this->getModel();
 		if ($Model) {
 			try {
-				$result = $Model->isAuthorized($requester, $controller, $action);
+				$result = $Model->isAuthorized($requester, $target, $action);
 				if ($result !== null) return $result;
 			} catch (Exception $e) {
 			}
 		}
 		
 		try {
-			$result = $controller->isAuthorized();
+			$result = $controller->isAuthorized($requester, $target, $action);
 			if ($result !== null) return $result;
 		} catch (Exception $e) {
 		}
 	}
 	
 	protected function getModel() {
-		if (empty($this->{$this->modelClass})) return null;
-		return $this->{$this->modelClass};
+		if (empty($this->controller->{$this->modelClass})) return null;
+		return $this->controller->{$this->modelClass};
 	}
 }
 
