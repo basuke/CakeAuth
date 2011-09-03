@@ -2,21 +2,17 @@
 
 class AuthComponent extends Object {
 	public $components = array('Auth.Authentication', 'Auth.Authorization');
-	
-	public $data;
-	
-	public $Authentication;
-	public $Authorization;
+	protected $initialized;
 	
 	public function initialize($controller, $settings = array()) {
 		$this->Authentication->initialize($controller, $settings);
 		$this->Authorization->initialize($controller, $settings);
+		
+		$this->initialized = true;
 	}
 	
 	public function startup($controller) {
 		$this->Authentication->startup($controller);
-		$this->data = $this->Authentication->data;
-		
 		$this->Authorization->startup($controller);
 	}
 	
@@ -39,15 +35,35 @@ class AuthComponent extends Object {
 		call_user_func_array(array($this->Authentication, 'deny'), $args);
 	}
 	
-	public function __set($name, $val) {
-		$this->{$name} = $val;
-		
-		if (!empty($this->Authentication) and property_exists($this->Authentication, $name)) {
-			$this->Authentication->{$name} = $val;
+	public function logout() {
+		return $this->Authentication->logout();
+	}
+	
+	public function __get($name) {
+		if ($this->initialized) {
+			if (!empty($this->Authentication) and property_exists($this->Authentication, $name)) {
+				return $this->Authentication->{$name};
+			}
+			
+			if (!empty($this->Authorization) and property_exists($this->Authorization, $name)) {
+				return $this->Authorization->{$name};
+			}
 		}
 		
-		if (!empty($this->Authorization) and property_exists($this->Authorization, $name)) {
-			$this->Authorization->{$name} = $val;
+		return null;
+	}
+	
+	public function __set($name, $val) {
+		if ($this->initialized) {
+			if (!empty($this->Authentication) and property_exists($this->Authentication, $name)) {
+				$this->Authentication->{$name} = $val;
+			}
+			
+			if (!empty($this->Authorization) and property_exists($this->Authorization, $name)) {
+				$this->Authorization->{$name} = $val;
+			}
+		} else {
+			$this->{$name} = $val;
 		}
 	}
 }
