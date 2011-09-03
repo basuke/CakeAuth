@@ -23,7 +23,7 @@ class AuthorizationComponent extends Object {
 		}
 		
 		if ($result === false) {
-			$this->controller->cakeError(403);
+			$this->controller->cakeError('error403');
 		}
 		
 		trigger_error(sprintf(
