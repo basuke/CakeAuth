@@ -5,6 +5,7 @@
 	identifyをdelegate対応
 	自動的にcontroller->data[User][password]をハッシュ化しない（コンポーネント側はする）
 	userVariableName を追加。コントローラに自動的に設定される
+	delegateに filterAuthUser を追加。user()が呼ばれる際にデータをフィルタリングできる
 	password:row にハッシュ前のパスワードを渡すように修正
 */
 
@@ -296,7 +297,7 @@ class AuthenticationComponent extends Object {
 						$controller->redirect($this->redirect(), null, true);
 					}
 					
-					$controller->set($this->userVariableName, $this->user());
+					$this->setControllerUser($controller);
 					return true;
 				}
 			}
@@ -305,8 +306,7 @@ class AuthenticationComponent extends Object {
 			$controller->data[$alias][$password] = null;
 			return false;
 		} else {
-			$user = $this->user();
-			if (!$user) {
+			if (!$this->user()) {
 				if (!$this->RequestHandler->isAjax()) {
 					$this->Session->setFlash($this->authError, $this->flashElement, array(), 'auth');
 					if (!empty($controller->params['url']) and count($controller->params['url']) >= 2) {
@@ -327,7 +327,7 @@ class AuthenticationComponent extends Object {
 				}
 			}
 			
-			$controller->set($this->userVariableName, $user);
+			$this->setControllerUser($controller);
 		}
 
 		return true;
@@ -483,12 +483,12 @@ class AuthenticationComponent extends Object {
 		if (!$this->Session->check($this->sessionKey)) {
 			return null;
 		}
-
+		
+		$user = $this->Session->read($this->sessionKey);
 		if ($key == null) {
 			$model = $this->getModel();
-			return array($model->alias => $this->Session->read($this->sessionKey));
+			return array($model->alias => $user);
 		} else {
-			$user = $this->Session->read($this->sessionKey);
 			if (isset($user[$key])) {
 				return $user[$key];
 			}
@@ -670,4 +670,15 @@ class AuthenticationComponent extends Object {
 	public function password($password) {
 		return Security::hash($password, null, true);
 	}
+	
+	protected function setControllerUser($controller) {
+		$user = $this->user();
+		
+		if (is_object($this->authenticate) and method_exists($this->authenticate, 'filterAuthUser')) {
+			$user = $this->authenticate->filterAuthUser($user);
+		}
+		
+		$controller->set($this->userVariableName, $user);
+	}
 }
+
