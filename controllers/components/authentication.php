@@ -497,6 +497,22 @@ class AuthenticationComponent extends Object {
 	}
 
 /**
+ * Get the current user from the session. delegate's filter applied.
+ *
+ * @return mixed User record. or null if no user is logged in.
+ * @access public
+ */
+	public function filteredUser() {
+		$user = $this->user();
+		
+		if (is_object($this->authenticate) and method_exists($this->authenticate, 'filterAuthUser')) {
+			$user = $this->authenticate->filterAuthUser($user);
+		}
+		
+		return $user;
+	}
+
+/**
  * If no parameter is passed, gets the authentication redirect URL.
  *
  * @param mixed $url Optional URL to write as the login redirect URL.
@@ -666,13 +682,7 @@ class AuthenticationComponent extends Object {
 	}
 	
 	protected function setControllerUser($controller) {
-		$user = $this->user();
-		
-		if (is_object($this->authenticate) and method_exists($this->authenticate, 'filterAuthUser')) {
-			$user = $this->authenticate->filterAuthUser($user);
-		}
-		
-		$controller->set($this->userVariableName, $user);
+		$controller->set($this->userVariableName, $this->filteredUser());
 	}
 }
 

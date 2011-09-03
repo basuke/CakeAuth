@@ -47,6 +47,10 @@ class AuthComponent extends Object {
 		return $this->Authentication->user($key);
 	}
 	
+	public function filteredUser() {
+		return $this->Authentication->filteredUser();
+	}
+	
 	public function redirect($url = null) {
 		return $this->Authentication->redirect($url);
 	}
