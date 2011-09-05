@@ -228,7 +228,7 @@ class AuthenticationComponent extends Object {
  * @access public
  */
 	public function startup($controller) {
-		$controller->set($this->userVariableName, '');
+		$this->setControllerUser($controller);
 		
 		$isErrorOrTests = (
 			strtolower($controller->name) == 'cakeerror' or
@@ -504,6 +504,7 @@ class AuthenticationComponent extends Object {
  */
 	public function filteredUser() {
 		$user = $this->user();
+		if (!$user) return $user;
 		
 		if (is_object($this->authenticate) and method_exists($this->authenticate, 'filterAuthUser')) {
 			$user = $this->authenticate->filterAuthUser($user);
