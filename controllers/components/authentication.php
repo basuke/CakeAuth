@@ -447,7 +447,7 @@ class AuthenticationComponent extends Object {
 		}
 
 		if ($user = $this->identify($data)) {
-			$this->Session->write($this->sessionKey, $user);
+			$this->update($user);
 			$this->_loggedIn = true;
 		}
 		return $this->_loggedIn;
@@ -469,7 +469,11 @@ class AuthenticationComponent extends Object {
 		$this->_loggedIn = false;
 		return Router::normalize($this->logoutRedirect);
 	}
-
+	
+	public function update($user) {
+		$this->Session->write($this->sessionKey, $user);
+	}
+	
 /**
  * Get the current user from the session.
  *

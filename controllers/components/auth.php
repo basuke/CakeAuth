@@ -43,6 +43,10 @@ class AuthComponent extends Object {
 		return $this->Authentication->logout();
 	}
 	
+	public function update($user) {
+		return $this->Authentication->update($user);
+	}
+	
 	public function user($key = null) {
 		return $this->Authentication->user($key);
 	}
