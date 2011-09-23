@@ -25,6 +25,10 @@ class AuthComponent extends Object {
 		return $this->Authorization->authorize($requester, $target);
 	}
 	
+	public function isAuthorized($requester, $target=null) {
+		return $this->Authorization->isAuthorized($requester, $target);
+	}
+	
 	public function allow() {
 		$args = func_get_args();
 		call_user_func_array(array($this->Authentication, 'allow'), $args);
