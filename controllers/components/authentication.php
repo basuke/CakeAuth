@@ -683,6 +683,10 @@ class AuthenticationComponent extends Object {
  * @link http://book.cakephp.org/view/1263/password
  */
 	public function password($password) {
+		if (is_object($this->authenticate) and method_exists($this->authenticate, 'password')) {
+			return $this->authenticate->password($password);
+		}
+		
 		return Security::hash($password, null, true);
 	}
 	
