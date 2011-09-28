@@ -449,6 +449,12 @@ class AuthenticationComponent extends Object {
 		if ($user = $this->identify($data)) {
 			$this->update($user);
 			$this->_loggedIn = true;
+			
+			if (is_object($this->authenticate) and method_exists($this->authenticate, 'authLogin')) {
+				$model = $this->getModel();
+				$data = array($model->alias => $user);
+				$this->authenticate->authLogin($data);
+			}
 		}
 		return $this->_loggedIn;
 	}
@@ -463,10 +469,16 @@ class AuthenticationComponent extends Object {
  * @link http://book.cakephp.org/view/1262/logout
  */
 	public function logout() {
+		if (is_object($this->authenticate) and method_exists($this->authenticate, 'authLogout')) {
+			$user = $this->user();
+			$this->authenticate->authLogout($user);
+		}
+		
 		$this->__setDefaults();
 		$this->Session->delete($this->sessionKey);
 		$this->Session->delete('Auth.redirect');
 		$this->_loggedIn = false;
+		
 		return Router::normalize($this->logoutRedirect);
 	}
 	
